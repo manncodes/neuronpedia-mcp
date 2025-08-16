@@ -152,6 +152,21 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['vectorId'],
         },
       },
+      {
+        name: 'generate_attribution_graph',
+        description: 'Generate an attribution graph for analyzing text prompts',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            prompt: { type: 'string', description: 'Text prompt to analyze' },
+            maxLogits: { type: 'number', description: 'Maximum number of logits (optional)' },
+            logitProbability: { type: 'number', description: 'Logit probability threshold (optional)' },
+            nodeThreshold: { type: 'number', description: 'Node threshold for graph (optional)' },
+            edgeThreshold: { type: 'number', description: 'Edge threshold for graph (optional)' },
+          },
+          required: ['prompt'],
+        },
+      },
     ],
   };
 });
@@ -294,6 +309,31 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: `Vector ${vectorId} deleted successfully`,
+            },
+          ],
+        };
+      }
+
+      case 'generate_attribution_graph': {
+        const { prompt, maxLogits, logitProbability, nodeThreshold, edgeThreshold } = args as {
+          prompt: string;
+          maxLogits?: number;
+          logitProbability?: number;
+          nodeThreshold?: number;
+          edgeThreshold?: number;
+        };
+        const result = await neuronpediaClient!.generateAttributionGraph(
+          prompt,
+          maxLogits,
+          logitProbability,
+          nodeThreshold,
+          edgeThreshold
+        );
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result, null, 2),
             },
           ],
         };

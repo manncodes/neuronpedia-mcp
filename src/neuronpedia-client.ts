@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { NeuronpediaConfig, Explanation, Activation, FeatureSearch, SteeringResult, Vector } from './types.js';
+import { NeuronpediaConfig, Explanation, Activation, FeatureSearch, SteeringResult, Vector, AttributionGraph } from './types.js';
 
 export class NeuronpediaClient {
   private client: AxiosInstance;
@@ -98,5 +98,23 @@ export class NeuronpediaClient {
 
   async deleteVector(vectorId: string): Promise<void> {
     await this.client.delete(`/vectors/${vectorId}`);
+  }
+
+  async generateAttributionGraph(
+    prompt: string,
+    maxLogits?: number,
+    logitProbability?: number,
+    nodeThreshold?: number,
+    edgeThreshold?: number
+  ): Promise<AttributionGraph> {
+    const response = await this.client.post('/graph/generate', {
+      prompt,
+      model: 'gemma-2-2b',
+      max_logits: maxLogits,
+      logit_probability: logitProbability,
+      node_threshold: nodeThreshold,
+      edge_threshold: edgeThreshold,
+    });
+    return response.data;
   }
 }
